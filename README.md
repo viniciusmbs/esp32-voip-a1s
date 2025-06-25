@@ -9,6 +9,7 @@ Placa usada no projeto ESP32 AUDIO KIT V2.2 ai-thinker
 *Sua placa ESP32-A1S Audio Kit v2.2_A (Modelo com ESP32-WROVER)*
 
 Este projeto transforma a placa **ESP32-A1S Audio Kit v2.2_A** em um interfone IP funcional. Ele usa o framework **ESP-ADF** para fazer chamadas **SIP de saída**, ideal para portaria ou automação residencial. O desenvolvimento foi feito e testado no **Ubuntu 20.04.6 LTS (VirtualBox)**.
+Uma forma facíl de fazer chamadas da Placa para fora de sua rede local. Projeto criado para automação de um interfone e conseguir que o interfone façca um aligacao para seu celular quando acionado o botão de chamada do interfone. 
 
 ## 🧰 Hardware e Ambiente
 
