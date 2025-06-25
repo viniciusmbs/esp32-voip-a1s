@@ -46,7 +46,7 @@ static const char *TAG = "VOIP_EXAMPLE";
 // Removido o "sip:" inicial do DESTINATION_SIP_URI.
 // A função esp_sip_uac_invite adiciona "sip:" automaticamente,
 // o que estava causando o erro "400 Bad Request URI" quando duplicado.
-#define DESTINATION_SIP_URI "1003" 
+#define DESTINATION_SIP_URI "1003"   //aqui voce coloca o spid nome que colocou na signalware
 
 static sip_handle_t sip;
 static audio_element_handle_t raw_read, raw_write;

@@ -128,7 +128,7 @@ CONFIG_SIP_CODEC_G711A=y
 # CONFIG_SIP_CODEC_G711U is not set
 CONFIG_WIFI_SSID="Pandora"
 CONFIG_WIFI_PASSWORD="vini5701"
-CONFIG_SIP_URI="udp://interfone:vinicius5711@vinicius-paes-mendes-038e5d9bec79.sip.signalwire.com:5060"
+CONFIG_SIP_URI="udp://1002:5711@192.168.100.186:5060" 
 # end of VoIP App Configuration
 
 #
