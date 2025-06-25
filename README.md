@@ -1,289 +1,121 @@
-# VoIP Example
+# Projeto Interfone VoIP com ESP32-A1S Audio Kit
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+![ESP32-A1S Audio Kit](https://i.imgur.com/mkMh8gi.jpeg)
+*Sua placa ESP32-A1S Audio Kit v2.2_A (Modelo com ESP32-WROVER)*
 
-## Overview
+Este projeto transforma a placa **ESP32-A1S Audio Kit v2.2_A** em um interfone IP funcional. Ele usa o framework **ESP-ADF** para fazer chamadas **SIP de saída**, ideal para portaria ou automação residencial. O desenvolvimento foi feito e testado no **Ubuntu 20.04.6 LTS (VirtualBox)**.
 
-This example allows users to make calls over the Internet.
+## 🧰 Hardware e Ambiente
 
-## Compatibility
+### Placa ESP32-A1S Audio Kit v2.2_A
 
-This example is will run on boards marked with green checkbox. Please remember to select the board in menuconfig as discussed is section *Usage* below.
+A placa principal é a **ESP32-A1S Audio Kit v2.2_A** da Ai-Thinker, com módulo ESP32-WROVER.
 
-| Board Name | Getting Started | Chip | Compatible |
-|-------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------:|:-----------------------------------------------------------------:|
-| ESP32-LyraT | [![alt text](../../../docs/_static/esp32-lyrat-v4.3-side-small.jpg "ESP32-LyraT")](https://docs.espressif.com/projects/esp-adf/en/latest/get-started/get-started-esp32-lyrat.html) | <img src="../../../docs/_static/ESP32.svg" height="85" alt="ESP32"> | ![alt text](../../../docs/_static/yes-button.png "Compatible") |
-| ESP32-LyraTD-MSC | [![alt text](../../../docs/_static/esp32-lyratd-msc-v2.2-small.jpg "ESP32-LyraTD-MSC")](https://docs.espressif.com/projects/esp-adf/en/latest/get-started/get-started-esp32-lyratd-msc.html) | <img src="../../../docs/_static/ESP32.svg" height="85" alt="ESP32"> | ![alt text](../../../docs/_static/yes-button.png "Compatible") |
-| ESP32-LyraT-Mini | [![alt text](../../../docs/_static/esp32-lyrat-mini-v1.2-small.jpg "ESP32-LyraT-Mini")](https://docs.espressif.com/projects/esp-adf/en/latest/get-started/get-started-esp32-lyrat-mini.html) | <img src="../../../docs/_static/ESP32.svg" height="85" alt="ESP32"> | ![alt text](../../../docs/_static/yes-button.png "Compatible") |
-| ESP32-Korvo-DU1906 | [![alt text](../../../docs/_static/esp32-korvo-du1906-v1.1-small.jpg "ESP32-Korvo-DU1906")](https://docs.espressif.com/projects/esp-adf/en/latest/get-started/get-started-esp32-korvo-du1906.html) | <img src="../../../docs/_static/ESP32.svg" height="85" alt="ESP32"> | ![alt text](../../../docs/_static/no-button.png "Compatible") |
-| ESP32-S2-Kaluga-1 Kit | [![alt text](../../../docs/_static/esp32-s2-kaluga-1-kit-small.png "ESP32-S2-Kaluga-1 Kit")](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-esp32-s2-kaluga-1-kit.html) | <img src="../../../docs/_static/ESP32-S2.svg" height="100" alt="ESP32-S2"> | ![alt text](../../../docs/_static/no-button.png "Compatible") |
+* **Onde comprar:** [Link para a placa no AliExpress](https://pt.aliexpress.com/item/1005001889297112.html)
+* **Documentação:** [docs.ai-thinker.com/en/esp32-audio-kit](https://docs.ai-thinker.com/en/esp32-audio-kit)
+* **Driver de Áudio (Codec):** Usa o codec **ES8388**. O driver da Ai-Thinker está em: [github.com/Ai-Thinker-Open/ESP32-A1S-AudioKit/tree/master/ESP32_AC101_Driver/ai_thinker_audio_kit_v2_2](https://github.com/Ai-Thinker-Open/ESP32-A1S-AudioKit/tree/master/ESP32_AC101_Driver/ai_thinker_audio_kit_v2_2)
 
-## How to use example
+### Pinagem de Áudio (Codec ES8388) e Botões
 
-### Configure the project
+Para o áudio (codec ES8388) funcionar corretamente, pinos I2C e I2S são usados. Este projeto utiliza arquivos de configuração de placa (`board` files) adaptados para a ESP32-A1S v2.2_A, copiados para a estrutura do ESP-ADF (`~/esp/esp-adf/components/audio_board/lyrat_v4_3/`).
 
-Open the project configuration menu (`make menuconfig` or `idf.py menuconfig`).
+**Pinos Chave de Áudio e Botões:**
 
-- Select compatible audio board in `Audio HAL`.
-- Set up Wi-Fi connection in `VoIP App Configuration` > `WiFi SSID` and `WiFi Password`.
-- Select compatible audio codec in `VoIP App Configuration` > `SIP Codec`.
-- Set up SIP URI (Transport://user:password@server:port) in `VoIP App Configuration` > `SIP_URI`.
+* **Pinos I2C:** SDA (GPIO 33), SCL (GPIO 32)
+* **Pinos I2S:** BCK (GPIO 27), WS (GPIO 25), Data Out (GPIO 26), Data In (GPIO 35), MCLK (GPIO 0)
+* **Botões (Pinos GPIO):**
+    * REC: GPIO 36
+    * MODE: GPIO 13
+    * SET: GPIO 19
+    * **PLAY: GPIO 23 (Usado para fazer a chamada)**
+    * VOLUP: GPIO 18
+    * VOLDOWN: GPIO 5
 
-### Setup external PBX server
+### Ambiente de Desenvolvimento (Detalhes)
 
-You can choose one of these servers to build, but we recommend FreePBX.
+* **Sistema Operacional:** Ubuntu 20.04.6 LTS (VirtualBox)
+* **Python:** 3.8.10
+* **Frameworks:** ESP-IDF v4.2.5, ESP-ADF v2.2
+* **Toolchain:** xtensa-esp32-elf esp-2020r3-8.4.0
 
-- Asterisk FreePBX
-    - https://www.freepbx.org/downloads/
-- Asterisk for Raspberry Pi
-    - http://www.raspberry-asterisk.org/
-- Freeswitch
-    - https://freeswitch.org/confluence/display/FREESWITCH/Installation
-- Kamailio
-    - https://kamailio.org/docs/tutorials/5.3.x/kamailio-install-guide-git/
-- Yate Server
-    - http://docs.yate.ro/wiki/Beginners_in_Yate
+## 🚀 Configuração e Como Usar
 
-### Build and flash
+1.  **Configure seu Ambiente Linux:**
+    * Certifique-se de ter Ubuntu 20.04.6 LTS e Python 3.8.10.
+    * **Clone e prepare os frameworks:**
+        ```bash
+        # Navegue para sua pasta de trabalho (ex: ~/)
+        cd ~
 
-Build the project and flash it to the board, then run monitor tool to view serial output:
+        # Clone o ESP-IDF (v4.2.5) e ESP-ADF (v2.2)
+        git clone -b v4.2.5 --recursive [https://github.com/espressif/esp-idf.git](https://github.com/espressif/esp-idf.git) esp/esp-idf
+        git clone -b v2.2 --recursive [https://github.com/espressif/esp-adf.git](https://github.com/espressif/esp-adf.git) esp/esp-adf
 
-```
-make -j8 flash monitor
-```
+        # Exporte as variáveis de ambiente (adicione ao ~/.bashrc ou ~/.profile para que sejam permanentes)
+        export IDF_PATH=~/esp/esp-idf
+        export ADF_PATH=~/esp/esp-adf
+        . $IDF_PATH/export.sh
+        ```
+        *(Consulte a documentação oficial da Espressif para mais detalhes de instalação.)*
 
-Or, for CMake based build system (replace PORT with serial port name):
+2.  **Copie os Arquivos `board` Adaptados:**
+    * Estes arquivos garantem a correta pinagem e funcionalidade da sua placa.
+    * **Copie o conteúdo da pasta** `kit_de_áudio_ai_thinker_v2_2` (onde estão `board.c`, `board.h`, `board_def.h`, `board_pins_config.c`) para:
+        `~/esp/esp-adf/components/audio_board/lyrat_v4_3/`
+    *(Isto substituirá os arquivos padrão e é essencial para o correto reconhecimento da placa.)*
 
-```
-idf.py -p PORT flash monitor
-```
+3.  **Clone este Projeto do Interfone:**
+    ```bash
+    # Navegue para sua pasta de trabalho (ex: ~/)
+    cd ~
 
-(To exit the serial monitor, type ``Ctrl-]``.)
+    # Clone este repositório
+    git clone [https://github.com/viniciusmbs/esp32-voip-a1s.git](https://github.com/viniciusmbs/esp32-voip-a1s.git)
 
-See the Getting Started Guide for full steps to configure and use ESP-IDF to build projects.
+    # Entre no diretório do projeto clonado
+    cd esp32-voip-a1s
+    ```
 
-## Features
+4.  **Configure o Projeto (`idf.py menuconfig`):**
+    Acesse o menu de configurações do projeto para sua rede e SIP.
+    ```bash
+    idf.py menuconfig
+    ```
+    No `menuconfig`:
+    * Em **`Audio HAL`**, selecione `ESP32-LyraT v4.3 Board`.
+    * Em **`VoIP App Configuration`**:
+        * **`WiFi SSID`**: O nome da sua rede Wi-Fi (ex: `Pandora`).
+        * **`WiFi Password`**: A senha da sua rede Wi-Fi (ex: `vini5701`).
+        * **`SIP Codec`**: `G711 PCMA`.
+        * **`SIP URI`**: O URI SIP de registro da sua placa. Ex: `udp://interfone:SUA_SENHA@seu_servidor.sip.signalwire.com:5060`.
 
-- Lightweight
-- Support multiple transports for SIP (UDP, TCP, TLS)
-- Support G711A/8000 & G711U/8000 Audio Codec
-- Easy setting up by using URI
-- Tested PBX Server list :
-    - Asterisk FreePBX v14 / v15
-    - Freeswitch v1.8.5
-    - Yate v6.0
-    - Kamailio v5.3
+5.  **Acione a Chamada:**
+    * O interfone ligará quando o botão **PLAY (GPIO 23)** for pressionado.
+    * No arquivo `main/voip_app.c`, a macro `DESTINATION_SIP_URI` define o ramal/número para onde a placa ligará (ex: `#define DESTINATION_SIP_URI "1003"`).
 
-## Example Output
+6.  **Compile, Flashee e Monitore:**
+    ```bash
+    idf.py build
+    idf.py -p /dev/ttyUSB0 flash monitor
+    ```
+    *(Substitua `/dev/ttyUSB0` pela sua porta serial. Para sair do monitor, use `Ctrl-]`.)*
 
-### SIP register
-```
-I (4164) VOIP_EXAMPLE: [ 3 ] Create and start input key service
-I (4164) VOIP_EXAMPLE: [ 4 ] Create SIP Service
-I (4184) SIP: Conecting...
-W (4184) SIP: CHANGE STATE FROM 0, TO 1, :func: sip_connect:1564
-I (4184) SIP: [1970-01-01/00:00:01]=======WRITE 0587 bytes>>
-I (4184) SIP:
+## 📞 Configuração da Plataforma VoIP (SignalWire)
 
-REGISTER sip:1000@192.168.50.50:5060 SIP/2.0
-Via: SIP/2.0/UDP 192.168.50.51:16810;branch=z9hG4bK--1374356523;rport
-From: <sip:1000@192.168.50.50:5060>;tag=319434100
-To: <sip:1000@192.168.50.50:5060>
-Contact: <sip:1000@192.168.50.51:16810>
-Max-Forwards: 70
-Call-ID: 92FA07B61E9DFFAEA89F08C3F382F7AF342CE46DC71F
-CSeq: 1 REGISTER
-Expires: 3600
-User-Agent: ESP32 SIP/2.0
-Content-Length: 0
-Allow: INVITE, ACK, CANCEL, BYE, UPDATE, REFER, MESSAGE, OPTIONS, INFO, SUBSCRIBE
-Supported: replaces, norefersub, extended-refer, timer, X-cisco-serviceuri
-Allow-Events: presence, kpml
+Este projeto foi testado com sucesso na **SignalWire**. Para as chamadas funcionarem:
 
-I (4244) SIP: [1970-01-01/00:00:01]=======================>>
-I (4294) SIP: [1970-01-01/00:00:01]<<=====READ 0612 bytes==
-I (4294) SIP:
+* **SIP Endpoint da Placa:** Crie um Endpoint SIP na SignalWire (ex: `interfone`) com as credenciais. A placa se registrará aqui.
+* **Destino da Chamada:** O `DESTINATION_SIP_URI` (ex: `1003`) na sua placa deve ser um ramal ou número configurado na SignalWire.
+* **Roteamento de Chamadas (`Call Flow`):** Na SignalWire, configure um `Call Flow` para o SIP ID da sua placa (ex: `interfone`). Este `Call Flow` direcionará a chamada para o destino final (ex: `1003`, `celular`, um número fixo, etc.), podendo gerenciar múltiplas tentativas, mensagens de áudio e gravação.
 
-SIP/2.0 401 Unauthorized
-Via: SIP/2.0/UDP 192.168.50.51:16810;branch=z9hG4bK--1374356523;rport=16810
-From: <sip:1000@192.168.50.50:5060>;tag=319434100
-To: <sip:1000@192.168.50.50:5060>;tag=DFvg6Q9830p9a
-Call-ID: 92FA07B61E9DFFAEA89F08C3F382F7AF342CE46DC71F
-CSeq: 1 REGISTER
-User-Agent: FreeSWITCH-mod_sofia/1.8.5~64bit
-Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, INFO, UPDATE, REGISTER, REFER, NOTIFY, PUBLISH, SUBSCRIBE
-Supported: timer, path, replaces
-WWW-Authenticate: Digest realm="192.168.50.50", nonce="f5d78ba3-36fd-4726-a4bb-a669fa0c575c", algorithm=MD5, qop="auth"
-Content-Length: 0
+---
 
-I (4344) SIP: [1970-01-01/00:00:01]<<======================
-I (4354) SIP: Required authentication
-I (4354) SIP: [1970-01-01/00:00:01]=======WRITE 0837 bytes>>
-I (4364) SIP:
+## 📄 Licença
 
-REGISTER sip:1000@192.168.50.50:5060 SIP/2.0
-Via: SIP/2.0/UDP 192.168.50.51:16810;branch=z9hG4bK-260131642;rport
-From: <sip:1000@192.168.50.50:5060>;tag=-1948762171
-To: <sip:1000@192.168.50.50:5060>
-Contact: <sip:1000@192.168.50.51:16810>
-Max-Forwards: 70
-Call-ID: 92FA07B61E9DFFAEA89F08C3F382F7AF342CE46DC71F
-CSeq: 2 REGISTER
-Expires: 3600
-User-Agent: ESP32 SIP/2.0
-Content-Length: 0
-Allow: INVITE, ACK, CANCEL, BYE, UPDATE, REFER, MESSAGE, OPTIONS, INFO, SUBSCRIBE
-Supported: replaces, norefersub, extended-refer, timer, X-cisco-serviceuri
-Allow-Events: presence, kpml
-Authorization: Digest username="1000", realm="192.168.50.50", nonce="f5d78ba3-36fd-4726-a4bb-a669fa0c575c", uri="sip:192.168.50.50:5060", response="3394d8e71a7d36abcced2a0912e3ff5c", algorithm=MD5, nc=00000001, cnonce="6fe907854a9bc351", qop="auth"
+Este código é distribuído sob a Licença MIT (ou CC0, a seu critério).
 
-I (4434) SIP: [1970-01-01/00:00:01]=======================>>
-I (4464) SIP: [1970-01-01/00:00:01]<<=====READ 0572 bytes==
-I (4464) SIP:
+---
 
-SIP/2.0 200 OK
-Via: SIP/2.0/UDP 192.168.50.51:16810;branch=z9hG4bK-260131642;rport=16810
-From: <sip:1000@192.168.50.50:5060>;tag=-1948762171
-To: <sip:1000@192.168.50.50:5060>;tag=erN97jtc19cvp
-Call-ID: 92FA07B61E9DFFAEA89F08C3F382F7AF342CE46DC71F
-CSeq: 2 REGISTER
-Contact: <sip:1000@192.168.50.51:16810>;expires=3600
-Date: Tue, 16 Jun 2020 12:09:04 GMT
-User-Agent: FreeSWITCH-mod_sofia/1.8.5~64bit
-Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, INFO, UPDATE, REGISTER, REFER, NOTIFY, PUBLISH, SUBSCRIBE
-Supported: timer, path, replaces
-Content-Length: 0
+## 🌟 Contribuição
 
-I (4514) SIP: [1970-01-01/00:00:01]<<======================
-I (4524) VOIP_EXAMPLE: SIP_EVENT_REGISTERED
-W (4524) SIP: CHANGE STATE FROM 1, TO 2, :func: sip_register:1592
-```
-
-### SIP call in
-
-```
-I (688034) SIP: [1970-01-01/00:11:13]<<=====READ 1372 bytes==
-I (688034) SIP:
-
-INVITE sip:1000@192.168.50.51:16810 SIP/2.0
-Via: SIP/2.0/UDP 192.168.50.50;rport;branch=z9hG4bKBXFpg22KXpmHj
-Max-Forwards: 69
-From: "Extension 1001" <sip:1001@192.168.50.50>;tag=9B06QD1BKt6mF
-To: <sip:1000@192.168.50.51:16810>
-Call-ID: 9a8db3e8-2a6e-1239-0d93-0b85a3e82ded
-CSeq: 21601221 INVITE
-Contact: <sip:mod_sofia@192.168.50.50:5060>
-User-Agent: FreeSWITCH-mod_sofia/1.8.5~64bit
-Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, INFO, UPDATE, REGISTER, REFER, NOTIFY, PUBLISH, SUBSCRIBE
-Supported: timer, path, replaces
-Allow-Events: talk, hold, conference, presence, as-feature-event, dialog, line-seize, call-info, sla, include-session-description, presence.winfo, message-summary, refer
-Content-Type: application/sdp
-Content-Disposition: session
-Content-Length: 443
-X-FS-Support: update_display,send_info
-Remote-Party-ID: "Extension 1001" <sip:1001@192.168.50.50>;party=calling;screen=yes;privacy=off
-
-v=0
-o=FreeSWITCH 1592283967 1592283968 IN IP4 192.168.50.50
-s=FreeSWITCH
-c=IN IP4 192.168.50.50
-t=0 0
-m=audio 26060 RTP/AVP 8 0 96 97 98 101 102 104
-a=rtpmap:8 PCMA/8000
-a=rtpmap:0 PCMU/8000
-a=rtpmap:96 SPEEX/16000
-a=rtpmap:97 SPEEX/8000
-a=rtpmap:98 SPEEX/32000
-a=rtpmap:101 telephone-event/8000
-a=fmtp:101 0-16
-a=rtpmap:102 telephone-event/16000
-a=fmtp:102 0-16
-a=rtpmap:104 telephone-event/32000
-a=fmtp:104 0-16
-a=ptime:20
-
-I (688154) SIP: [1970-01-01/00:11:13]<<======================
-I (688164) SIP: Remote RTP port=26060
-I (688164) SIP: Remote RTP addr=192.168.50.50
-I (688164) SIP: call from 1001
-I (688174) SIP: [1970-01-01/00:11:13]=======WRITE 0414 bytes>>
-I (688174) SIP:
-
-SIP/2.0 100 Trying
-Via: SIP/2.0/UDP 192.168.50.50;rport;branch=z9hG4bKBXFpg22KXpmHj
-Contact: <sip:1000@192.168.50.51:16810>
-From: "Extension 1001" <sip:1001@192.168.50.50>;tag=9B06QD1BKt6mF
-To: <sip:1000@192.168.50.51:16810>;tag=645213922
-Call-ID: 9a8db3e8-2a6e-1239-0d93-0b85a3e82ded
-CSeq: 21601221 INVITE
-Server: ESP32 SIP/2.0
-Allow: ACK, INVITE, BYE, UPDATE, CANCEL, OPTIONS, INFO
-Content-Length: 0
-
-I (688214) SIP: [1970-01-01/00:11:13]=======================>>
-I (688224) SIP: [1970-01-01/00:11:13]=======WRITE 0417 bytes>>
-I (688234) SIP:
-
-SIP/2.0 180 Ringing
-Via: SIP/2.0/UDP 192.168.50.50;rport;branch=z9hG4bKBXFpg22KXpmHj
-Contact: <sip:1000@192.168.50.51:16810>
-From: "Extension 1001" <sip:1001@192.168.50.50>;tag=9B06QD1BKt6mF
-To: <sip:1000@192.168.50.51:16810>;tag=-1799498926
-Call-ID: 9a8db3e8-2a6e-1239-0d93-0b85a3e82ded
-CSeq: 21601221 INVITE
-Server: ESP32 SIP/2.0
-Allow: ACK, INVITE, BYE, UPDATE, CANCEL, OPTIONS, INFO
-Content-Length: 0
-
-I (688274) SIP: [1970-01-01/00:11:13]=======================>>
-W (688284) SIP: CHANGE STATE FROM 2, TO 16, :func: _sip_uas_process_req_invite:810
-I (689384) VOIP_EXAMPLE: ringing... RemotePhoneNum 1001
-I (690384) VOIP_EXAMPLE: ringing... RemotePhoneNum 1001
-I (691384) VOIP_EXAMPLE: ringing... RemotePhoneNum 1001
-I (692384) VOIP_EXAMPLE: ringing... RemotePhoneNum 1001
-```
-
-### SIP hangup
-
-```
-I (1372804) SIP: User call sip BYE
-I (1372834) SIP: [1970-01-01/00:22:25]=======WRITE 0664 bytes>>
-I (1372834) SIP:
-
-BYE sip:mod_sofia@192.168.50.50:5060 SIP/2.0
-Via: SIP/2.0/UDP 192.168.50.50;rport;branch=z9hG4bKDF27Kr4tQ80pS
-From: <sip:1000@192.168.50.51:16810>;tag=1647388708
-To: "Extension 1001" <sip:1001@192.168.50.50>;tag=6HXNBy9HZvcKF
-Contact: <sip:1000@192.168.50.51:16810>
-Max-Forwards: 70
-Call-ID: 2f65a33b-2a70-1239-0d93-0b85a3e82ded
-CSeq: 43 BYE
-Expires: 3600
-User-Agent: ESP32 SIP/2.0
-Content-Length: 0
-Authorization: Digest username="1000", realm="192.168.50.50", nonce="f5d78ba3-36fd-4726-a4bb-a669fa0c575c", uri="sip:192.168.50.50:5060", response="f8c3de6f561f54dec9498a28f2fb5c73", algorithm=MD5, nc=0000002a, cnonce="19f9e2e22ddc905c", qop="auth"
-
-I (1372884) SIP: [1970-01-01/00:22:25]=======================>>
-I (1372914) SIP: [1970-01-01/00:22:25]<<=====READ 0501 bytes==
-I (1372914) SIP:
-
-SIP/2.0 200 OK
-Via: SIP/2.0/UDP 192.168.50.50;rport=16810;branch=z9hG4bKDF27Kr4tQ80pS;received=192.168.50.51
-From: <sip:1000@192.168.50.51:16810>;tag=1647388708
-To: "Extension 1001" <sip:1001@192.168.50.50>;tag=6HXNBy9HZvcKF
-Call-ID: 2f65a33b-2a70-1239-0d93-0b85a3e82ded
-CSeq: 43 BYE
-User-Agent: FreeSWITCH-mod_sofia/1.8.5~64bit
-Allow: INVITE, ACK, BYE, CANCEL, OPTIONS, MESSAGE, INFO, UPDATE, REGISTER, REFER, NOTIFY, PUBLISH, SUBSCRIBE
-Supported: timer, path, replaces
-Content-Length: 0
-
-I (1372954) SIP: [1970-01-01/00:22:25]<<======================
-W (1372964) SIP: CHANGE STATE FROM 32, TO 2, :func: _sip_request_bye:1368
-I (1372974) SIP_RTP: send task stopped
-I (1373024) VOIP_EXAMPLE: SIP_EVENT_AUDIO_SESSION_END
-```
-
-## Troubleshooting
-
-- If you need reduce the RTT(Response time), you can set esp_log_level_set("SIP", ESP_LOG_WARN);
+Sinta-se à vontade para contribuir com melhorias, sugestões ou correções.
