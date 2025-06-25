@@ -1,8 +1,10 @@
 # Projeto Interfone VoIP com ESP32-A1S Audio Kit
-pLACA USADA NO PROJETO ESP32 AUDIO KIT V2.2 ai-thinker
+Placa usada no projeto ESP32 AUDIO KIT V2.2 ai-thinker
 
-![ESP32-A1S Audio Kit]
+
+
 <img src="https://i.imgur.com/mkMh8gi.jpeg" width="300">
+
 
 *Sua placa ESP32-A1S Audio Kit v2.2_A (Modelo com ESP32-WROVER)*
 
