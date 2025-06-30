@@ -1,265 +1,138 @@
-# Projeto Interfone VoIP com ESP32-A1S Audio Kit
-
+Projeto Interfone VoIP com ESP32-A1S Audio Kit
 Placa usada no projeto ESP32 AUDIO KIT V2.2 ai-thinker
-
-
-
-
-
-
 
 <img src="https://i.imgur.com/mkMh8gi.jpeg" width="300">
 
+Sua placa ESP32-A1S Audio Kit v2.2_A (Modelo com ESP32-WROVER)
 
+Este projeto transforma a placa ESP32-A1S Audio Kit v2.2_A em um interfone IP funcional. Ele usa o framework ESP-ADF para fazer chamadas SIP de saída, ideal para portaria ou automação residencial. O desenvolvimento foi feito e testado no Ubuntu 20.04.6 LTS (VirtualBox).
+Uma forma facíl de fazer chamadas da Placa para fora de sua rede local. Projeto criado para automação de um interfone e conseguir que o interfone faça uma aligacao para seu celular quando acionado o botão de chamada do interfone. 
 
+🧰 Hardware e Ambiente
+Placa ESP32-A1S Audio Kit v2.2_A
+A placa principal é a ESP32-A1S Audio Kit v2.2_A da Ai-Thinker, com módulo ESP32-WROVER.
 
+Onde comprar: Link para a placa no AliExpress
 
-*Sua placa ESP32-A1S Audio Kit v2.2_A (Modelo com ESP32-WROVER)*
+Documentação: docs.ai-thinker.com/en/esp32-audio-kit
 
+Driver de Áudio (Codec): Usa o codec ES8388. O driver da Ai-Thinker está em: github.com/Ai-Thinker-Open/ESP32-A1S-AudioKit/tree/master/ESP32_AC101_Driver/ai_thinker_audio_kit_v2_2
 
+Pinagem de Áudio (Codec ES8388) e Botões
+Para o áudio (codec ES8388) funcionar corretamente, pinos I2C e I2S são usados. Este projeto utiliza arquivos de configuração de placa (board files) adaptados para a ESP32-A1S v2.2_A, copiados para a estrutura do ESP-ADF (~/esp/esp-adf/components/audio_board/lyrat_v4_3/).
 
-Este projeto transforma a placa **ESP32-A1S Audio Kit v2.2_A** em um interfone IP funcional. Ele usa o framework **ESP-ADF** para fazer chamadas **SIP de saída**, ideal para portaria ou automação residencial. O desenvolvimento foi feito e testado no **Ubuntu 20.04.6 LTS (VirtualBox)**.
+Pinos Chave de Áudio e Botões:
 
-Uma forma facíl de fazer chamadas da Placa para fora de sua rede local. Projeto criado para automação de um interfone e conseguir que o interfone façca um aligacao para seu celular quando acionado o botão de chamada do interfone. 
+Pinos I2C: SDA (GPIO 33), SCL (GPIO 32)
 
+Pinos I2S: BCK (GPIO 27), WS (GPIO 25), Data Out (GPIO 26), Data In (GPIO 35), MCLK (GPIO 0)
 
-
-## 🧰 Hardware e Ambiente
-
-
-
-### Placa ESP32-A1S Audio Kit v2.2_A
-
-
-
-A placa principal é a **ESP32-A1S Audio Kit v2.2_A** da Ai-Thinker, com módulo ESP32-WROVER.
-
-
-
-* **Onde comprar:** [Link para a placa no AliExpress](https://pt.aliexpress.com/item/1005001889297112.html)
-
-* **Documentação:** [docs.ai-thinker.com/en/esp32-audio-kit](https://docs.ai-thinker.com/en/esp32-audio-kit)
-
-* **Driver de Áudio (Codec):** Usa o codec **ES8388**. O driver da Ai-Thinker está em: [github.com/Ai-Thinker-Open/ESP32-A1S-AudioKit/tree/master/ESP32_AC101_Driver/ai_thinker_audio_kit_v2_2](https://github.com/Ai-Thinker-Open/ESP32-A1S-AudioKit/tree/master/ESP32_AC101_Driver/ai_thinker_audio_kit_v2_2)
-
-
-
-### Pinagem de Áudio (Codec ES8388) e Botões
-
-
-
-Para o áudio (codec ES8388) funcionar corretamente, pinos I2C e I2S são usados. Este projeto utiliza arquivos de configuração de placa (`board` files) adaptados para a ESP32-A1S v2.2_A, copiados para a estrutura do ESP-ADF (`~/esp/esp-adf/components/audio_board/lyrat_v4_3/`).
-
-
-
-**Pinos Chave de Áudio e Botões:**
-
-
-
-* **Pinos I2C:** SDA (GPIO 33), SCL (GPIO 32)
-
-* **Pinos I2S:** BCK (GPIO 27), WS (GPIO 25), Data Out (GPIO 26), Data In (GPIO 35), MCLK (GPIO 0)
-
-* **Botões (Pinos GPIO):**
-
+Botões (Pinos GPIO):
     * REC: GPIO 36
-
     * MODE: GPIO 13
-
     * SET: GPIO 19
-
-    * **PLAY: GPIO 23 (Usado para fazer a chamada)**
-
+    * PLAY: GPIO 23 (Usado para fazer a chamada)
     * VOLUP: GPIO 18
-
     * VOLDOWN: GPIO 5
 
+Ambiente de Desenvolvimento (Detalhes)
+Sistema Operacional: Ubuntu 20.04.6 LTS (VirtualBox)
 
+Python: 3.8.10
 
-### Ambiente de Desenvolvimento (Detalhes)
+Frameworks: ESP-IDF v4.2.5, ESP-ADF v2.2
 
+Toolchain: xtensa-esp32-elf esp-2020r3-8.4.0
 
-
-* **Sistema Operacional:** Ubuntu 20.04.6 LTS (VirtualBox)
-
-* **Python:** 3.8.10
-
-* **Frameworks:** ESP-IDF v4.2.5, ESP-ADF v2.2
-
-* **Toolchain:** xtensa-esp32-elf esp-2020r3-8.4.0
-
-
-
-## 🚀 Configuração e Como Usar
-
-
-
-1.  **Configure seu Ambiente Linux:**
-
+🚀 Configuração e Como Usar
+1.  Configure seu Ambiente Linux:
     * Certifique-se de ter Ubuntu 20.04.6 LTS e Python 3.8.10.
-
-    * **Clone e prepare os frameworks:**
-
+    * Clone e prepare os frameworks:
         ```bash
-
         # Navegue para sua pasta de trabalho (ex: ~/)
-
         cd ~
 
-
-
         # Clone o ESP-IDF (v4.2.5) e ESP-ADF (v2.2)
-
-        git clone -b v4.2.5 --recursive [https://github.com/espressif/esp-idf.git](https://github.com/espressif/esp-idf.git) esp/esp-idf
-
-        git clone -b v2.2 --recursive [https://github.com/espressif/esp-adf.git](https://github.com/espressif/esp-adf.git) esp/esp-adf
-
-
+        git clone -b v4.2.5 --recursive https://github.com/espressif/esp-idf.git esp/esp-idf
+        git clone -b v2.2 --recursive https://github.com/espressif/esp-adf.git esp/esp-adf
 
         # Exporte as variáveis de ambiente (adicione ao ~/.bashrc ou ~/.profile para que sejam permanentes)
-
         export IDF_PATH=~/esp/esp-idf
-
         export ADF_PATH=~/esp/esp-adf
-
         . $IDF_PATH/export.sh
-
         ```
+        (Consulte a documentação oficial da Espressif para mais detalhes de instalação.)
 
-        *(Consulte a documentação oficial da Espressif para mais detalhes de instalação.)*
+2.  Copie os Arquivos board Adaptados (Essencial para funcionamento dos GPIOs):
+    * Estes arquivos são cruciais para garantir a correta pinagem e funcionalidade da sua placa ESP32-A1S v2.2_A dentro do ESP-ADF.
+    * Você precisará copiar os arquivos de configuração do seu repositório audio_board (que você subiu no GitHub) para o diretório de componentes da placa em seu ambiente local do ESP-ADF.
+    * Localização dos arquivos no seu repositório: Eles estão em https://github.com/viniciusmbs/audio_board/tree/main/esp32_audio_kit_v2_3.
+    * Os arquivos a serem copiados são:
+        * board.c
+        * board.h
+        * board_def.h
+        * board_pins_conf.c
 
+    * Passos para copiar e substituir os arquivos:
+        1. Certifique-se de que o repositório audio_board está clonado localmente. Se ainda não estiver, clone-o para um diretório conveniente (por exemplo, ~/Música/audio_board):
+            bash             cd ~/Música             git clone https://github.com/viniciusmbs/audio_board.git             
+            (Se você já clonou, pode pular este passo.)
 
+        2. Copie os arquivos da pasta esp32_audio_kit_v2_3 do seu repositório audio_board para o diretório lyrat_v4_3 do seu ESP-ADF.
+            ```bash
+            # Navegue para o diretório de destino no ESP-ADF
+            cd ~/esp/esp-adf/components/audio_board/lyrat_v4_3
 
-2.  **Copie os Arquivos `board` Adaptados:**
+            # Copie e substitua os arquivos
+            cp ~/Música/audio_board/esp32_audio_kit_v2_3/board.c .
+            cp ~/Música/audio_board/esp32_audio_kit_v2_3/board.h .
+            cp ~/Música/audio_board/esp32_audio_kit_v2_3/board_def.h .
+            cp ~/Música/audio_board/esp32_audio_kit_v2_3/board_pins_conf.c .
+            ```
+            (Isso substituirá quaisquer arquivos padrão existentes no diretório lyrat_v4_3 e é fundamental para o correto funcionamento dos GPIOs e drivers de áudio da sua placa.)
 
-    * Estes arquivos garantem a correta pinagem e funcionalidade da sua placa.
-
-    * **Copie o conteúdo da pasta** `kit_de_áudio_ai_thinker_v2_2` (onde estão `board.c`, `board.h`, `board_def.h`, `board_pins_config.c`) para:
-
-        `~/esp/esp-adf/components/audio_board/lyrat_v4_3/`
-
-    *(Isto substituirá os arquivos padrão e é essencial para o correto reconhecimento da placa.)*
-
-
-
-3.  **Clone este Projeto do Interfone:**
-
+3.  Clone este Projeto do Interfone:
     ```bash
-
     # Navegue para sua pasta de trabalho (ex: ~/)
-
     cd ~
 
-
-
     # Clone este repositório
-
-    git clone [https://github.com/viniciusmbs/esp32-voip-a1s.git](https://github.com/viniciusmbs/esp32-voip-a1s.git)
-
-
+    git clone https://github.com/viniciusmbs/esp32-voip-a1s.git
 
     # Entre no diretório do projeto clonado
-
     cd esp32-voip-a1s
-
     ```
 
-
-
-4.  **Configure o Projeto (`idf.py menuconfig`):**
-
+4.  Configure o Projeto (idf.py menuconfig):
     Acesse o menu de configurações do projeto para sua rede e SIP.
+    bash     idf.py menuconfig     
+    No menuconfig:
+    * Em Audio HAL, selecione ESP32-LyraT v4.3 Board.
+    * Em VoIP App Configuration:
+        * WiFi SSID: O nome da sua rede Wi-Fi (ex: Pandora).
+        * WiFi Password: A senha da sua rede Wi-Fi (ex: vini5701).
+        * SIP Codec: G711 PCMA.
+        * SIP URI: O URI SIP de registro da sua placa. Ex: udp://interfone:SUA_SENHA@seu_servidor.sip.signalwire.com:5060.
 
-    ```bash
+5.  Acione a Chamada:
+    * O interfone ligará quando o botão PLAY (GPIO 23) for pressionado.
+    * No arquivo main/voip_app.c, a macro DESTINATION_SIP_URI define o ramal/número para onde a placa ligará (ex: #define DESTINATION_SIP_URI "1003").
 
-    idf.py menuconfig
+6.  Compile, Flashee e Monitore:
+    bash     idf.py build     idf.py -p /dev/ttyUSB0 flash monitor     
+    (Substitua /dev/ttyUSB0 pela sua porta serial. Para sair do monitor, use Ctrl-].)
 
-    ```
+📞 Configuração da Plataforma VoIP (SignalWire)
+Este projeto foi testado com sucesso na SignalWire. Para as chamadas funcionarem:
 
-    No `menuconfig`:
+SIP Endpoint da Placa: Crie um Endpoint SIP na SignalWire (ex: interfone) com as credenciais. A placa se registrará aqui.
 
-    * Em **`Audio HAL`**, selecione `ESP32-LyraT v4.3 Board`.
+Destino da Chamada: O DESTINATION_SIP_URI (ex: 1003) na sua placa deve ser um ramal ou número configurado na SignalWire.
 
-    * Em **`VoIP App Configuration`**:
+Roteamento de Chamadas (Call Flow): Na SignalWire, configure um Call Flow para o SIP ID da sua placa (ex: interfone). Este Call Flow direcionará a chamada para o destino final (ex: 1003, celular, um número fixo, etc.), podendo gerenciar múltiplas tentativas, mensagens de áudio e gravação.
 
-        * **`WiFi SSID`**: O nome da sua rede Wi-Fi (ex: `Pandora`).
-
-        * **`WiFi Password`**: A senha da sua rede Wi-Fi (ex: `vini5701`).
-
-        * **`SIP Codec`**: `G711 PCMA`.
-
-        * **`SIP URI`**: O URI SIP de registro da sua placa. Ex: `udp://interfone:SUA_SENHA@seu_servidor.sip.signalwire.com:5060`.
-
-
-
-5.  **Acione a Chamada:**
-
-    * O interfone ligará quando o botão **PLAY (GPIO 23)** for pressionado.
-
-    * No arquivo `main/voip_app.c`, a macro `DESTINATION_SIP_URI` define o ramal/número para onde a placa ligará (ex: `#define DESTINATION_SIP_URI "1003"`).
-
-
-
-6.  **Compile, Flashee e Monitore:**
-
-    ```bash
-
-    idf.py build
-
-    idf.py -p /dev/ttyUSB0 flash monitor
-
-    ```
-
-    *(Substitua `/dev/ttyUSB0` pela sua porta serial. Para sair do monitor, use `Ctrl-]`.)*
-
-
-
-## 📞 Configuração da Plataforma VoIP (SignalWire)
-
-
-
-Este projeto foi testado com sucesso na **SignalWire**. Para as chamadas funcionarem:
-
-
-
-* **SIP Endpoint da Placa:** Crie um Endpoint SIP na SignalWire (ex: `interfone`) com as credenciais. A placa se registrará aqui.
-
-* **Destino da Chamada:** O `DESTINATION_SIP_URI` (ex: `1003`) na sua placa deve ser um ramal ou número configurado na SignalWire.
-
-* **Roteamento de Chamadas (`Call Flow`):** Na SignalWire, configure um `Call Flow` para o SIP ID da sua placa (ex: `interfone`). Este `Call Flow` direcionará a chamada para o destino final (ex: `1003`, `celular`, um número fixo, etc.), podendo gerenciar múltiplas tentativas, mensagens de áudio e gravação.
-
-
-
----
-
-
-
-## 📄 Licença
-
-
-
+📄 Licença
 Este código é distribuído sob a Licença MIT (ou CC0, a seu critério).
 
-
-
----
-
-
-
-## 🌟 Contribuição
-
-
-
+🌟 Contribuição
 Sinta-se à vontade para contribuir com melhorias, sugestões ou correções.
-
-
-
-
-
-
-
-que seria este e reformule quais os arquivos vai para cada pasta tipo copiar https://github.com/viniciusmbs/audio_board/tree/main
-
-
-
-e passar para pasta ~/esp/esp-adf/components/audio_board$  pode modificar isso e lincar a parte que precisa copiar estes arquivos e subistituir esta pasta pois eles sao essenciais para que s gpios funcionem
